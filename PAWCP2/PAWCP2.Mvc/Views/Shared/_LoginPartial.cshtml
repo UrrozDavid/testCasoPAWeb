@@ -1,0 +1,33 @@
+﻿@model PAWCP2.Mvc.Models.LoginViewModel
+
+<div class="modal show" id="loginModal" tabindex="-1" role="dialog" style="display:block; background-color:rgba(0,0,0,0.6);">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content p-3">
+            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form" }))
+            {
+                <div class="modal-header">
+                    <h5 class="modal-title">Iniciar sesión</h5>
+                </div>
+                <div class="modal-body">
+                    @if (ViewBag.LoginFailed == true)
+                    {
+                        <div class="alert alert-danger">Usuario o contraseña incorrectos</div>
+                    }
+                    <div>
+                        @Html.LabelFor(m => m.Username)
+                        @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Username)
+                    </div>
+                    <div>
+                        @Html.LabelFor(m => m.Password)
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Password)
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
