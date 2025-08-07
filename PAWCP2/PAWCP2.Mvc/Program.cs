@@ -1,3 +1,10 @@
+using APW.Architecture;
+using Microsoft.EntityFrameworkCore;
+using PAWCP2.Core.Manager;
+using PAWCP2.Core.Models;
+using PAWCP2.Core.Repositories;
+using PAWCP2.Mvc.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +13,30 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSession();
+
+builder.Services.AddTransient<IRestProvider, RestProvider>();
+
+// ****************************************************************************//
+// User
+builder.Services.AddScoped<IRepositoryUser, RepositoryUser>();
+builder.Services.AddScoped<IManagerUser, ManagerUser>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<UserRolesService>();
+
+//Roles
+builder.Services.AddScoped<IRepositoryRole, RepositoryRole>();
+builder.Services.AddScoped<IManagerRole, ManagerRole>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<RoleService>();
+
+//userRoles
+builder.Services.AddScoped<IRepositoryUserRole, RepositoryUserRole>();
+builder.Services.AddScoped<IManagerUserRole, ManagerUserRole>();
+builder.Services.AddScoped<IUserRolesService, UserRolesService>();
+
+builder.Services.AddDbContext<FoodbankContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ****************************************************************************//
 
 var app = builder.Build();
 

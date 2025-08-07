@@ -1,6 +1,8 @@
 ﻿using PAWCP2.Core.Extensions;
 using PAWCP2.Core.Models;
 using PAWCP2.Core.Repositories;
+using PAWCP2.Models.DTOs;
+using PAWCP2.Models.Entities;
 using PAWCP2.Models.Enums;
 
 namespace PAWCP2.Core.Manager
@@ -10,7 +12,8 @@ namespace PAWCP2.Core.Manager
         Task<IEnumerable<UserRole>> GetAllUserRolesAsync();
         Task<bool> SaveUserRoleAsync(UserRole userRole);
         Task<bool> DeleteUserRoleAsync(UserRole userRole);
-        Task<UserRole> GetUserRoleAsync(int id);
+        Task<UserRole> GetUserRoleAsync(int userId);
+        Task<IEnumerable<UserRoleDto>> ReadDtoAsync();
 
     }
 
@@ -27,6 +30,8 @@ namespace PAWCP2.Core.Manager
             userRole.AddAudit("system");
             userRole.AddLogging(isUpdate ? PAWCP2.Models.Enums.LoggingType.Update : PAWCP2.Models.Enums.LoggingType.Create);
 
+            return await repositoryUserRole.CheckBeforeSavingAsync(userRole);
+            /*
             if (isUpdate)
             {
                 var existing = await repositoryUserRole.FindAsync(userRole.UserId);
@@ -41,7 +46,7 @@ namespace PAWCP2.Core.Manager
             else
             {
                 return await repositoryUserRole.CreateAsync(userRole);
-            }
+            }*/
         }
 
         public async Task<bool> DeleteUserRoleAsync(UserRole userRole)
@@ -49,9 +54,15 @@ namespace PAWCP2.Core.Manager
             return await repositoryUserRole.DeleteAsync(userRole);
         }
 
-        public async Task<UserRole> GetUserRoleAsync(int id)
+        public async Task<UserRole> GetUserRoleAsync(int userId)
         {
-            return await repositoryUserRole.FindAsync(id);
+            return await repositoryUserRole.FindAsync(userId);
         }
+
+        public async Task<IEnumerable<UserRoleDto>> ReadDtoAsync()
+        {
+            return await repositoryUserRole.ReadDtoAsync();
+        }
+
     }
 }

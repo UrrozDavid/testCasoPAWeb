@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using PAWCP2.Models.TBAModels;
 
-namespace PAWCP2.Core.Models;
+namespace PAWCP2.Models.Entities;
 
-public partial class User
+public partial class User : Entity
 {
     public int UserId { get; set; }
 

@@ -26,12 +26,19 @@
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">UserRoles</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="UserRole" asp-action="Index">UserRoles</a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+
+                        @if (HttpContextAccessor.HttpContext.Session.GetString("User") is not null) 
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -39,7 +46,7 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
-            @RenderBody();
+            @RenderBody()
 
             @if (HttpContextAccessor.HttpContext.Session.GetString("User") == null)
             {

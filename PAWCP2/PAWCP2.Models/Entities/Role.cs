@@ -1,9 +1,10 @@
-﻿using System;
+﻿using PAWCP2.Models.TBAModels;
+using System;
 using System.Collections.Generic;
 
-namespace PAWCP2.Core.Models;
+namespace PAWCP2.Models.Entities;
 
-public partial class Role
+public partial class Role : Entity
 {
     public int RoleId { get; set; }
 

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using PAWCP2.Models;
+using PAWCP2.Models.Entities;
 
 namespace PAWCP2.Core.Models;
 

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using PAWCP2.Models.TBAModels;
+using System;
 using System.Collections.Generic;
 
-namespace PAWCP2.Core.Models;
+namespace PAWCP2.Models.Entities;
 
-public partial class FoodItem
+public partial class FoodItem : Entity
 {
     public int FoodItemId { get; set; }
 

@@ -1,0 +1,42 @@
+﻿@model UserRoleViewModel
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
+
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Role</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userRole in Model.UserRoles)
+        {
+            <tr>
+                <td>@userRole.UserName</td>
+
+                <td colspan="2">
+                    <form asp-action="Save" method="post" class="d-flex gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" value="@userRole.UserId" />
+
+                        <select name="roleId" class="form-select">
+                            @foreach (var r in Model.Roles)
+                            {
+                                <option value="@r.RoleId" selected="@(r.RoleId == userRole.RoleId)">
+                                    @r.RoleName
+                                </option>
+                            }
+                        </select>
+
+                        <button type="submit" class="btn btn-info btn-sm">Save</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
