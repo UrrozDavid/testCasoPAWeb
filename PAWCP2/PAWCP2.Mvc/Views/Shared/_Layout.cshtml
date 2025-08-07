@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -22,6 +24,11 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">UserRoles</a>
+                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
@@ -34,9 +41,15 @@
         <main role="main" class="pb-3">
             @RenderBody();
 
-            @if (TempData["User"] == null)
+            @if (HttpContextAccessor.HttpContext.Session.GetString("User") == null)
             {
-                @await Html.PartialAsync("_LoginPartial", new LoginViewModel())
+                var model = new LoginViewModel();
+                if (TempData["LoginFailed"] != null)
+                {
+                    ViewBag.LoginFailed = true;
+                }
+
+                @await Html.PartialAsync("_LoginPartial", model)
             }
         </main>
     </div>

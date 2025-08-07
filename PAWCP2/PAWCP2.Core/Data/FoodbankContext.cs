@@ -31,9 +31,9 @@ public partial class FoodbankContext : DbContext
     {
         modelBuilder.Entity<FoodItem>(entity =>
         {
-            entity.HasKey(e => e.FoodItemId).HasName("PK__FoodItem__464DCBF25CAF2090");
+            entity.HasKey(e => e.FoodItemId).HasName("PK__FoodItem__464DCBF2F83631DC");
 
-            entity.HasIndex(e => e.Barcode, "UQ__FoodItem__177800D37616F4D0").IsUnique();
+            entity.HasIndex(e => e.Barcode, "UQ__FoodItem__177800D3A86525EA").IsUnique();
 
             entity.Property(e => e.FoodItemId).HasColumnName("FoodItemID");
             entity.Property(e => e.Barcode).HasMaxLength(50);
@@ -59,9 +59,9 @@ public partial class FoodbankContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1A4533FD84");
+            entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1AF101378A");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B616082BD3F84").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Roles__8A2B6160ABC3D6B0").IsUnique();
 
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.RoleName).HasMaxLength(50);
@@ -69,11 +69,11 @@ public partial class FoodbankContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C58884232");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C70F427A5");
 
-            entity.HasIndex(e => e.Username, "UQ__Users__536C85E499CDBD62").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__Users__536C85E4629E10D7").IsUnique();
 
-            entity.HasIndex(e => e.Email, "UQ__Users__A9D105342AE5D560").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534EB884A5F").IsUnique();
 
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -87,7 +87,7 @@ public partial class FoodbankContext : DbContext
 
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__UserRole__AF2760ADAB4C1343");
+            entity.HasKey(e => new { e.UserId, e.RoleId }).HasName("PK__UserRole__AF2760AD46824484");
 
             entity.Property(e => e.Description)
                 .HasMaxLength(10)

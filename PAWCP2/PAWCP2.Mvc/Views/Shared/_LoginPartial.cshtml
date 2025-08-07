@@ -6,12 +6,12 @@
             @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form" }))
             {
                 <div class="modal-header">
-                    <h5 class="modal-title">Iniciar sesión</h5>
+                    <h5 class="modal-title">Log In</h5>
                 </div>
                 <div class="modal-body">
                     @if (ViewBag.LoginFailed == true)
                     {
-                        <div class="alert alert-danger">Usuario o contraseña incorrectos</div>
+                    <div class="alert alert-danger">User or password incorrect</div>
                     }
                     <div>
                         @Html.LabelFor(m => m.Username)

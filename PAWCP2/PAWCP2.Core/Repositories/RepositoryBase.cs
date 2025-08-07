@@ -1,0 +1,255 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using PAWCP2.Core.Models;
+using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
+
+namespace TBA.Repositories;
+
+/// <summary>
+/// Interface for basic repository operations.
+/// </summary>
+/// <typeparam name="T">The type of entity.</typeparam>
+public interface IRepositoryBase<T>
+{
+    /// <summary>
+    /// Method that updates the entity if exists otherwise inserts a new record
+    /// </summary>
+    /// <param name="entity">The entity to be deleted.</param>
+    /// <param name="isUpdating">The indicator that tells if I need to update or create</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    Task<bool> UpsertAsync(T entity, bool isUpdating);
+
+    /// <summary>
+    /// Creates a new entity asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to be created.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    Task<bool> CreateAsync(T entity);
+
+    /// <summary>
+    /// Deletes an existing entity asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to be deleted.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    Task<bool> DeleteAsync(T entity);
+
+    /// <summary>
+    /// Reads all entities of type T asynchronously.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of entities.</returns>
+    Task<IEnumerable<T>> ReadAsync();
+
+    /// <summary>
+    /// Finds an entity from the list of objects
+    /// </summary>
+    /// <param name="id">integer</param>
+    /// <returns>Entity by id</returns>
+    Task<T> FindAsync(int id);
+
+    /// <summary>
+    /// Updates an existing entity asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to be updated.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    Task<bool> UpdateAsync(T entity);
+
+    /// <summary>
+    /// Updates multiple entities asynchronously.
+    /// </summary>
+    /// <param name="entities">The collection of entities to be updated.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    Task<bool> UpdateManyAsync(IEnumerable<T> entities);
+
+    /// <summary>
+    /// Checks if an entity exists asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to check for existence.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating if the entity exists.</returns>
+    Task<bool> ExistsAsync(T entity);
+}
+
+/// <summary>
+/// Base class for repository operations.
+/// </summary>
+/// <typeparam name="T">Entity type.</typeparam>
+public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
+{
+    protected readonly FoodbankContext _context;
+
+    protected FoodbankContext DbContext => _context;
+    protected DbSet<T> DbSet;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RepositoryBase{T}"/> class.
+    /// </summary>
+    public RepositoryBase(FoodbankContext context)
+    {
+        _context = context;
+        DbSet = _context.Set<T>();
+    }
+
+    public async Task<bool> UpsertAsync(T entity, bool isUpdating)
+    {
+        return isUpdating
+            ? await UpdateAsync(entity)
+            : await CreateAsync(entity);
+    }
+
+    /// <summary>
+    /// Creates an entity of type T asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to be saved in the database.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    public async Task<bool> CreateAsync(T entity)
+    {
+        try
+        {
+            await _context.AddAsync(entity);
+            return await SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+    /// <summary>
+    /// Updates an existing entity of type T asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to be updated.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    public async Task<bool> UpdateAsync(T entity)
+    {
+        try
+        {
+            var key = _context.Model.FindEntityType(typeof(T))
+                        ?.FindPrimaryKey()
+                        ?.Properties.FirstOrDefault();
+
+            if (key == null)
+                throw new Exception($"Entity {typeof(T).Name} does not have a primary key.");
+
+            var keyValue = entity.GetType().GetProperty(key.Name)?.GetValue(entity);
+            if (keyValue == null)
+                throw new Exception($"Key value is null for entity {typeof(T).Name}.");
+
+            var existingEntity = await _context.Set<T>().FindAsync(keyValue);
+            if (existingEntity == null)
+                throw new Exception($"Entity {typeof(T).Name} with key {keyValue} not found.");
+
+            
+            _context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
+            return await SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// Updates multiple entities of type T asynchronously.
+    /// </summary>
+    /// <param name="entities">The collection of entities to be updated.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    public async Task<bool> UpdateManyAsync(IEnumerable<T> entities)
+    {
+        try
+        {
+            _context.UpdateRange(entities);
+            return await SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+    /// <summary>
+    /// Deletes an entity of type T asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to be deleted.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    public async Task<bool> DeleteAsync(T entity)
+    {
+        try
+        {
+            _context.Remove(entity);
+            return await SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+    /// <summary>
+    /// Reads all entities of type T asynchronously.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of entities.</returns>
+    public async Task<IEnumerable<T>> ReadAsync()
+    {
+        try
+        {
+            return await _context.Set<T>().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+    /// <summary>
+    /// Reads an entity of type T asynchronously.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a collection of entities.</returns>
+    public async Task<T> FindAsync(int id)
+    {
+        try
+        {
+            return await _context.Set<T>().FindAsync(id);
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+    /// <summary>
+    /// Checks if an entity of type T exists asynchronously.
+    /// </summary>
+    /// <param name="entity">The entity to check for existence.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating if the entity exists.</returns>
+    public async Task<bool> ExistsAsync(T entity)
+    {
+        try
+        {
+            var items = await ReadAsync();
+            return items.Any(x => x.Equals(entity));
+        }
+        catch (Exception ex)
+        {
+            throw new PAWCP2Exception(ex);
+        }
+    }
+
+    /// <summary>
+    /// Saves changes to the database asynchronously.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating success.</returns>
+    protected async Task<bool> SaveAsync()
+    {
+        var result = await _context.SaveChangesAsync();
+        return result > 0;
+    }
+
+    public virtual async Task<object> GetData()
+    {
+        //llame suppliers y products
+        await System.Threading.Tasks.Task.Run(() => { });
+        return null;
+    }
+}

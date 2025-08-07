@@ -15,12 +15,12 @@ namespace PAWCP2.Mvc.Controllers
         {
             if (ModelState.IsValid && model.Username == "admin" && model.Password == "1234")
             {
-                TempData["User"] = model.Username;
+                HttpContext.Session.SetString("User", model.Username);
                 return RedirectToAction("Index", "Home");
             }
 
-            ViewBag.LoginFailed = true;
-            return View("~/Views/Shared/_LoginPartial.cshtml", model);
+            TempData["LoginFailed"] = true;
+            return RedirectToAction("Index", "Home");
         }
     }
 }
