@@ -1,0 +1,40 @@
+﻿@model IEnumerable<TBA.Models.Entities.Board>
+
+@{
+    ViewData["Title"] = "Boards";
+}
+
+<h1>Boards</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
+
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Created By</th>
+            <th>Creation Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var board in Model)
+        {
+            <tr>
+                <td>@board.Name</td>
+                <td>@board.Description</td>
+                <td>@board.CreatedBy</td>
+                <td>@board.CreatedAt</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@board.BoardId" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Edit" asp-route-id="@board.BoardId" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-controller="Tasks" asp-action="Index" asp-route-boardId="@board.BoardId" class="btn btn-info">Ver</a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>

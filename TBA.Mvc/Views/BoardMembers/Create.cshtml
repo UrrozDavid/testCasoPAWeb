@@ -1,0 +1,48 @@
+﻿@model TBA.Models.Entities.BoardMember
+
+@{
+    ViewData["Title"] = "Create Board Member";
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm rounded-4 mx-auto" style="max-width: 480px;">
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <h3 class="mb-0">Create Board Member</h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" novalidate="novalidate">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="BoardId" class="form-label fw-semibold"></label>
+                    <select asp-for="BoardId" class="form-select" asp-items="ViewBag.BoardId">
+                        <option value="">-- Select Board --</option>
+                    </select>
+                    <span asp-validation-for="BoardId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="UserId" class="form-label fw-semibold"></label>
+                    <select asp-for="UserId" class="form-select" asp-items="ViewBag.UserId">
+                        <option value="">-- Select User --</option>
+                    </select>
+                    <span asp-validation-for="UserId" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="bi bi-plus-circle me-2"></i> Create
+                </button>
+            </form>
+
+            <div class="mt-3 text-center">
+                <a asp-action="Index" class="btn btn-link">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,39 @@
+﻿@model IEnumerable<TBA.Models.Entities.Comment>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Create New</a>
+</p>
+
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th>Comment Text</th>
+            <th>Created At</th>
+            <th>Card</th>
+            <th>User</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var comment in Model)
+        {
+            <tr>
+                <td>@comment.CommentText</td>
+                <td>@comment.CreatedAt</td>
+                <td>@comment.Card?.Title</td>
+                <td>@comment.User?.Email</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@comment.CommentId" class="btn btn-info btn-sm">Details</a>
+                    <a asp-action="Edit" asp-route-id="@comment.CommentId" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@comment.CommentId" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
