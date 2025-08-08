@@ -50,7 +50,10 @@ namespace PAWCP2.Mvc.Controllers
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-            
+
+            user.LastLogin = DateTime.Now;
+            await userService.UpdateAsync(user);
+
             HttpContext.Session.SetString("User", user.Username);
             HttpContext.Session.SetString("BasicUser", model.Username);
             HttpContext.Session.SetString("BasicPass", model.Password);
