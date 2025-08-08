@@ -7,41 +7,40 @@ using System.Text;
 using System.Threading.Tasks;
 using TBA.Repositories;
 
-namespace PAWCP2.Core.Repositories
+namespace PAWCP2.Core.Repositories;
+
+public interface IRepositoryRole
 {
-    public interface IRepositoryRole
+    Task<bool> UpsertAsync(Role entity, bool isUpdating);
+
+    Task<bool> CreateAsync(Role entity);
+
+    Task<bool> DeleteAsync(Role entity);
+
+    Task<IEnumerable<Role>> ReadAsync();
+
+    Task<Role> FindAsync(int id);
+
+    Task<bool> UpdateAsync(Role entity);
+
+    Task<bool> UpdateManyAsync(IEnumerable<Role> entities);
+
+    Task<bool> ExistsAsync(Role entity);
+    Task<bool> CheckBeforeSavingAsync(Role entity);
+}
+
+public class RepositoryRole : RepositoryBase<Role>, IRepositoryRole 
+{
+    public RepositoryRole(FoodbankContext context) : base(context) { }
+
+    public async Task<bool> CheckBeforeSavingAsync(Role entity)
     {
-        Task<bool> UpsertAsync(Role entity, bool isUpdating);
-
-        Task<bool> CreateAsync(Role entity);
-
-        Task<bool> DeleteAsync(Role entity);
-
-        Task<IEnumerable<Role>> ReadAsync();
-
-        Task<Role> FindAsync(int id);
-
-        Task<bool> UpdateAsync(Role entity);
-
-        Task<bool> UpdateManyAsync(IEnumerable<Role> entities);
-
-        Task<bool> ExistsAsync(Role entity);
-        Task<bool> CheckBeforeSavingAsync(Role entity);
-    }
-
-    public class RepositoryRole : RepositoryBase<Role>, IRepositoryRole 
-    {
-        public RepositoryRole(FoodbankContext context) : base(context) { }
-
-        public async Task<bool> CheckBeforeSavingAsync(Role entity)
+        var exists = await ExistsAsync(entity);
+        if (exists)
         {
-            var exists = await ExistsAsync(entity);
-            if (exists)
-            {
-                // algo más
-            }
-
-            return await UpsertAsync(entity, exists);
+            // algo más
         }
+
+        return await UpsertAsync(entity, exists);
     }
 }

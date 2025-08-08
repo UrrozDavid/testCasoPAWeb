@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PAWCP2.Core.Manager;
 using PAWCP2.Models.DTOs;
@@ -6,6 +7,7 @@ using PAWCP2.Models.Entities;
 
 namespace PAWCP2.API.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class UserRolesController (IManagerUserRole managerUserRole) : Controller
@@ -37,7 +39,6 @@ namespace PAWCP2.API.Controllers
 
             return Ok(true); 
         }
-
         [HttpDelete("{userId:int}/{roleId:int}")]
         public async Task<IActionResult> Delete(int userId, int roleId)
             => Ok(await managerUserRole.DeleteUserRoleAsync(new UserRole { UserId = userId, RoleId = roleId }));

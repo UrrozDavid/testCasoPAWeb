@@ -12,6 +12,7 @@ namespace PAWCP2.Core.Manager
         Task<bool> SaveUserAsync(User user);
         Task<bool> DeleteUserAsync(User user);
         Task<User> GetUserAsync(int id);
+        Task <User?> AuthenticateAsync(string username, string password);
 
     }
 
@@ -55,5 +56,18 @@ namespace PAWCP2.Core.Manager
         {
             return await repositoryUser.FindAsync(id);
         }
+
+        public async Task<User?> AuthenticateAsync(string username, string password)
+        {
+            // Verifica que el username exista
+            var user = await repositoryUser.GetByUsernameAsync(username);
+            if (user == null) return null;
+
+            // Si existe, verifica la contraseña
+            var isValid = password == user.Password;
+
+            return isValid ? user : null;
+        }
+
     }
 }

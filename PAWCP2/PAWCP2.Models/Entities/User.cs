@@ -1,7 +1,8 @@
 ﻿using PAWCP2.Models.TBAModels;
+using System;
+using System.Collections.Generic;
 
 namespace PAWCP2.Models.Entities;
-
 public partial class User : Entity
 {
     public int UserId { get; set; }
@@ -17,6 +18,8 @@ public partial class User : Entity
     public DateTime CreatedAt { get; set; }
 
     public DateTime? LastLogin { get; set; }
+
+    public string Password { get; set; } = null!;
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

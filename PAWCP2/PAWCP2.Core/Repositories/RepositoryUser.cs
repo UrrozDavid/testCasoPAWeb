@@ -1,4 +1,5 @@
-﻿using PAWCP2.Core.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using PAWCP2.Core.Models;
 using PAWCP2.Models.Entities;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,8 @@ namespace PAWCP2.Core.Repositories
 
         Task<bool> ExistsAsync(User entity);
         Task<bool> CheckBeforeSavingAsync(User entity);
+
+        Task<User> GetByUsernameAsync(string username);
     }
 
     public class RepositoryUser : RepositoryBase<User>, IRepositoryUser
@@ -43,5 +46,8 @@ namespace PAWCP2.Core.Repositories
 
             return await UpsertAsync(entity, exists);
         }
+    
+        public async Task<User> GetByUsernameAsync(string username) => await DbContext.Users.FirstOrDefaultAsync(x => x.Username == username);
+
     }
 }

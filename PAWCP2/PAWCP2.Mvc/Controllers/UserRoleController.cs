@@ -30,7 +30,14 @@ namespace PAWCP2.Mvc.Controllers
         // GET: UserRole
         public async Task<IActionResult> Index()
         {
+            var currentUser = HttpContext.Session.GetString("User")
+                              ?? User.Identity?.Name;
+
             var userRoles = await _userRolesService.GetAllAsync();
+            if (!string.IsNullOrWhiteSpace(currentUser))
+                userRoles = userRoles.Where(ur => !string.Equals(ur.UserName, currentUser, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+
             var viewModel = new UserRoleViewModel
             {
                 UserRoles = userRoles,

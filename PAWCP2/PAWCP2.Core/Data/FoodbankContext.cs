@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using PAWCP2.Models;
 using PAWCP2.Models.Entities;
 
 namespace PAWCP2.Core.Models;
@@ -84,6 +83,7 @@ public partial class FoodbankContext : DbContext
             entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.LastLogin).HasColumnType("datetime");
+            entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Username).HasMaxLength(50);
         });
 

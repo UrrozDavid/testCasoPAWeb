@@ -1,4 +1,6 @@
 ﻿using PAWCP2.Models.TBAModels;
+using System;
+using System.Collections.Generic;
 
 namespace PAWCP2.Models.Entities;
 

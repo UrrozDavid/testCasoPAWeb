@@ -12,6 +12,8 @@ namespace PAWCP2.Mvc.Service
         Task<int?> CreateAsync(User user);
         Task<bool> UpdateAsync(User user);
         Task<bool> DeleteAsync(int id);
+
+        Task<User?> AuthenticateAsync(string username, string password);
     }
 
     public class UserService : IUserService
@@ -42,5 +44,8 @@ namespace PAWCP2.Mvc.Service
             if (user == null) return false;
             return await _business.DeleteUserAsync(user);
         }
+
+        // ----------------- AUTH -----------------
+        public async Task<User?> AuthenticateAsync(string username, string password) => await _business.AuthenticateAsync(username, password);
     }
 }

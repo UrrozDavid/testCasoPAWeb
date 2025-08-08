@@ -1,8 +1,10 @@
 using APW.Architecture;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using PAWCP2.Core.Manager;
 using PAWCP2.Core.Models;
 using PAWCP2.Core.Repositories;
+using PAWCP2.Models.Entities;
 using PAWCP2.Mvc.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +14,14 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient("api");
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie();
 builder.Services.AddSession();
 
-builder.Services.AddTransient<IRestProvider, RestProvider>();
+
+builder.Services.AddScoped<IRestProvider, PAWCP2.Mvc.Service.AuthRestProvider>();
 
 // ****************************************************************************//
 // User
