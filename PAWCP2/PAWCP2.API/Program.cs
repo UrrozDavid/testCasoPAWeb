@@ -64,11 +64,17 @@ builder.Services.AddScoped<IManagerUserRole, ManagerUserRole>();
 builder.Services.AddScoped<IUserRolesService, UserRolesService>();
 builder.Services.AddScoped<UserRolesService>();
 
+
 builder.Services.AddDbContext<FoodbankContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("FoodbankContext")));
+//fooditem
+builder.Services.AddScoped<IRepositoryFoodItem, RepositoryFoodItem>();
+builder.Services.AddScoped<IManagerFoodItem, ManagerFoodItem>();
+
 // ****************************************************************************//
 
- var app = builder.Build();
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -42,5 +42,6 @@ namespace PAWCP2.API.Controllers
         [HttpDelete("{userId:int}/{roleId:int}")]
         public async Task<IActionResult> Delete(int userId, int roleId)
             => Ok(await managerUserRole.DeleteUserRoleAsync(new UserRole { UserId = userId, RoleId = roleId }));
+        
     }
 }

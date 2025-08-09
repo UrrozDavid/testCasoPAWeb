@@ -1,0 +1,48 @@
+﻿@model List<PAWCP2.Models.Entities.FoodItem>
+@using System.Globalization
+@{
+    ViewData["Title"] = "Food Items";
+    var cr = new CultureInfo("es-CR");
+}
+
+<h1>@ViewData["Title"]</h1>
+
+
+
+<table class="table table-striped table-hover table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th class="text-end">Price</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Category</td>
+                <td class="text-end">@item.Price.ToString("C0", cr)</td>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a asp-action="Details" asp-route-id="@item.FoodItemId" class="btn btn-outline-secondary btn-sm">Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.FoodItemId" class="btn btn-info btn-sm text-white">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@item.FoodItemId" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('¿Eliminar este item?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>

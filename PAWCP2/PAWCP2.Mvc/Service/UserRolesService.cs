@@ -14,6 +14,8 @@ namespace PAWCP2.Mvc.Service
         Task<UserRoleDto?> GetByIdAsync(int userId, int roleId);
         Task<bool> SaveAsync(IEnumerable<UserRole> userRole);
         Task<bool> DeleteAsync(int userId, int roleId);
+        Task<int?> GetRoleIdByUserId(int userId);
+
     }
 
     public class UserRolesService(IRestProvider restProvider) : IUserRolesService
@@ -52,5 +54,17 @@ namespace PAWCP2.Mvc.Service
             var result = await restProvider.DeleteAsync("https://localhost:7099/UserRoles/", $"{userId}/${roleId}");
             return true;
         }
+        public async Task<int?> GetRoleIdByUserId(int userId)
+        {
+            
+
+            var response = await restProvider.GetAsync("https://localhost:7099/UserRoles/", $"{userId}");
+            
+
+            var userRole = await JsonProvider.DeserializeAsync<UserRoleDto>(response);
+            return userRole?.RoleId;
+        }
+
+
     }
 }

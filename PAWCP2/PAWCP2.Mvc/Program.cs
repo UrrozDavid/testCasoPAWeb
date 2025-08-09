@@ -43,6 +43,9 @@ builder.Services.AddScoped<IUserRolesService, UserRolesService>();
 
 builder.Services.AddDbContext<FoodbankContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//foodItem
+builder.Services.AddScoped<IFoodItemService, FoodItemService>();
 // ****************************************************************************//
 
 var app = builder.Build();

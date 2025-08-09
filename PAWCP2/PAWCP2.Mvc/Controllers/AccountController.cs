@@ -9,7 +9,7 @@ namespace PAWCP2.Mvc.Controllers
 {
     public class AccountController(IUserService userService) : Controller
     {
-        // Retorna el PartialView de Login
+        
         public PartialViewResult LoginPartial() => PartialView("~/Views/Shared/_LoginPartial.cshtml", new LoginViewModel());
 
 
@@ -17,7 +17,7 @@ namespace PAWCP2.Mvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            // Destino de regreso si hay error
+            
             var back = Request.Headers["Referer"].ToString();
             if (string.IsNullOrWhiteSpace(back))
                 back = Url.Action("Index", "Home")!;
@@ -43,17 +43,15 @@ namespace PAWCP2.Mvc.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
+                new Claim(ClaimTypes.Email, user.Email),
+             new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
+};
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            user.LastLogin = DateTime.Now;
-            await userService.UpdateAsync(user);
-
+            
             HttpContext.Session.SetString("User", user.Username);
             HttpContext.Session.SetString("BasicUser", model.Username);
             HttpContext.Session.SetString("BasicPass", model.Password);
