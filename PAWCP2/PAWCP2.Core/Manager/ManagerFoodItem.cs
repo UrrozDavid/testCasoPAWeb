@@ -11,6 +11,9 @@ namespace PAWCP2.Core.Manager
     public interface IManagerFoodItem
     {
         Task<IEnumerable<FoodItem>> GetByRoleAsync(int roleId);
+        Task<List<string>> GetCategoriesAsync();
+        Task<List<string>> GetBrandsAsync();
+        Task<List<string>> GetSuppliersAsync();
     }
 
     public class ManagerFoodItem : IManagerFoodItem
@@ -26,5 +29,15 @@ namespace PAWCP2.Core.Manager
         {
             return await _repository.ReadByRoleAsync(roleId);
         }
+
+        public async Task<List<string>> GetCategoriesAsync()
+        {
+            return await _repository.GetCategoriesAsync();
+        }
+        public async Task<List<string>> GetBrandsAsync()
+        => await _repository.GetBrandsAsync();
+
+        public async Task<List<string>> GetSuppliersAsync()
+            => await _repository.GetSuppliersAsync();
     }
 }

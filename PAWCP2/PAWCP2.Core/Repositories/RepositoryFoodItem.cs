@@ -14,6 +14,9 @@ namespace PAWCP2.Core.Repositories
     {
         Task<IEnumerable<FoodItem>> ReadAsync();
         Task<IEnumerable<FoodItem>> ReadByRoleAsync(int roleId);
+        Task<List<string>> GetCategoriesAsync();
+        Task<List<string>> GetBrandsAsync();
+        Task<List<string>> GetSuppliersAsync();
     }
 
     public class RepositoryFoodItem : RepositoryBase<FoodItem>, IRepositoryFoodItem
@@ -27,6 +30,32 @@ namespace PAWCP2.Core.Repositories
         {
             return await _context.FoodItems
                 .Where(f => f.RoleId == roleId)
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetCategoriesAsync()
+        {
+            return await _context.FoodItems
+                .Where(f => f.Category != null)
+                .Select(f => f.Category!)
+                .Distinct()
+                .ToListAsync();
+        }
+        public async Task<List<string>> GetBrandsAsync()
+        {
+            return await _context.FoodItems
+                .Where(f => f.Brand != null)
+                .Select(f => f.Brand!)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<string>> GetSuppliersAsync()
+        {
+            return await _context.FoodItems
+                .Where(f => f.Supplier != null)
+                .Select(f => f.Supplier!)
+                .Distinct()
                 .ToListAsync();
         }
 

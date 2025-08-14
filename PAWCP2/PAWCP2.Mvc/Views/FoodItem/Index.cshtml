@@ -1,48 +1,207 @@
-﻿@model List<PAWCP2.Models.Entities.FoodItem>
+﻿@model PAWCP2.Mvc.ViewModels.FoodItemSearchViewModel
 @using System.Globalization
 @{
     ViewData["Title"] = "Food Items";
     var cr = new CultureInfo("es-CR");
 }
 
-<h1>@ViewData["Title"]</h1>
+<style>
 
+    .filters-card {
+        margin-bottom: 1.25rem;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        border-radius: .75rem;
+    }
+    .filters-card .card-body {
+        padding: 1rem;
+    }
+    .filter-row .form-control,
+    .filter-row .form-select {
+        min-width: 0;
+    }
+    .filter-actions {
+        display:flex;
+        gap:.5rem;
+        align-items:center;
+    }
+    .table-responsive {
+        margin-top: .5rem;
+    }
+    .small-muted {
+        font-size: .85rem;
+        color: #6c757d;
+    }
+    .badge-active { background-color: #198754; color: white; }
+    .badge-inactive { background-color: #6c757d; color: white; }
+</style>
 
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+        <div class="small-muted">Resultados: <strong>@Model.FoodItems?.Count() ?? 0</strong></div>
+    </div>
 
-<table class="table table-striped table-hover table-bordered">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th class="text-end">Price</th>
-            
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.Category</td>
-                <td class="text-end">@item.Price.ToString("C0", cr)</td>
+    <div class="card filters-card">
+        <div class="card-body">
+            <form class="row g-2 filter-row" method="get" asp-action="Index">
 
-                @if (User.IsInRole("Admin"))
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Category</label>
+                    <select name="Category" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            <option value="@category" selected="@(Model.Category == category ? "selected" : null)">@category</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3">
+                    <label class="form-label">Brand</label>
+                    <select name="Brand" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var brand in Model.Brands)
+                        {
+                            <option value="@brand" selected="@(Model.Brand == brand ? "selected" : null)">@brand</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <label class="form-label">Price Min</label>
+                    <input type="number" step="0.01" name="PriceMin" class="form-control" value="@(Model.PriceMin?.ToString() ?? "")" placeholder="Min" />
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <label class="form-label">Price Max</label>
+                    <input type="number" step="0.01" name="PriceMax" class="form-control" value="@(Model.PriceMax?.ToString() ?? "")" placeholder="Max" />
+                </div>
+
+                <div class="col-12 col-md-2">
+                    <label class="form-label">Supplier</label>
+                    <select name="Supplier" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var supplier in Model.Suppliers)
+                        {
+                            <option value="@supplier" selected="@(Model.Supplier == supplier ? "selected" : null)">@supplier</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <label class="form-label">Exp. after</label>
+                    <input type="date" name="ExpirationDate" class="form-control"
+                           value="@(Model.ExpirationDate.HasValue ? Model.ExpirationDate.Value.ToString("yyyy-MM-dd") : "")" />
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <label class="form-label">Calories ≤</label>
+                    <input type="number" name="CaloriesMax" class="form-control" value="@(Model.CaloriesMax?.ToString() ?? "")" />
+                </div>
+
+                <div class="col-6 col-md-2 d-flex align-items-center">
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="isPerishable" name="IsPerishable" value="true"
+                               @(Model.IsPerishable == true ? "checked" : "") />
+                        <label class="form-check-label" for="isPerishable">Is Perishable</label>
+                    </div>
+                </div>
+
+                <div class="col-6 col-md-2 d-flex align-items-center">
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" value="true"
+                               @(Model.IsActive == true ? "checked" : "") />
+                        <label class="form-check-label" for="isActive">Is Active</label>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4 d-flex justify-content-end align-items-end filter-actions">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                    <button type="submit" name="clear" value="true" class="btn btn-outline-secondary">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Brand</th>
+                    <th class="text-end">Price</th>
+                    <th>Unit</th>
+                    <th class="text-end">Qty</th>
+                    <th>Expiration</th>
+                    <th>Perishable</th>
+                    <th class="text-end">Calories</th>
+                    <th>Supplier</th>
+                    <th>Status</th>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th>Actions</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.FoodItems == null || !Model.FoodItems.Any())
                 {
-                    <td>
-                        <div class="d-flex gap-2">
-                            <a asp-action="Details" asp-route-id="@item.FoodItemId" class="btn btn-outline-secondary btn-sm">Details</a>
-                            <a asp-action="Edit" asp-route-id="@item.FoodItemId" class="btn btn-info btn-sm text-white">Edit</a>
-                            <form asp-action="Delete" asp-route-id="@item.FoodItemId" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('¿Eliminar este item?');">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
-                    </td>
+                    <tr>
+                        <td colspan="12" class="text-center small-muted">No items found.</td>
+                    </tr>
                 }
-            </tr>
-        }
-    </tbody>
-</table>
+                else
+                {
+                    foreach (var item in Model.FoodItems)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Category</td>
+                            <td>@item.Brand</td>
+                            <td class="text-end">@item.Price.ToString("C0", cr)</td>
+                            <td>-</td>
+                            <td class="text-end">-</td>
+                            <td>
+                                @(
+                                    item.ExpirationDate.HasValue
+                                    ? item.ExpirationDate.Value.ToString("yyyy-MM-dd")
+                                    : "-"
+                                  )
+                            </td>
+                            <td>
+                                @(item.IsPerishable == true ? "Yes" : "No")
+                            </td>
+                            <td class="text-end">@(item.CaloriesPerServing?.ToString() ?? "-")</td>
+                            <td>@(item.Supplier ?? "-")</td>
+                            <td>
+                                @if (item.IsActive == true)
+                                {
+                                    <span class="badge badge-active">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-inactive">Inactive</span>
+                                }
+                            </td>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a asp-action="Details" asp-route-id="@item.FoodItemId" class="btn btn-outline-secondary btn-sm">Details</a>
+                                        <a asp-action="Edit" asp-route-id="@item.FoodItemId" class="btn btn-info btn-sm text-white">Edit</a>
+                                        <form asp-action="Delete" asp-route-id="@item.FoodItemId" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este item?');">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
