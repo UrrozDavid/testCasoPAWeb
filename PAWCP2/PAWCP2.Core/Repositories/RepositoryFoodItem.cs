@@ -19,6 +19,8 @@ namespace PAWCP2.Core.Repositories
         Task<List<string>> GetSuppliersAsync();
         Task<bool> SetQuantityAsync(int id, int quantity);
         Task<bool> SetActiveAsync(int id, bool isActive);
+        Task<FoodItem> ReadByIdAsync(int id);
+
 
     }
 
@@ -78,7 +80,10 @@ namespace PAWCP2.Core.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
-
+        public async Task<FoodItem> ReadByIdAsync(int id)
+        {
+            return await _context.FoodItems.FindAsync(id);
+        }
 
     }
 }

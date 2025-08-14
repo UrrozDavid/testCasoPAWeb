@@ -200,21 +200,20 @@
                                     }
                                 </td>
 
-                                @if (User.IsInRole("Admin"))
+                                @if (User.IsInRole("admin"))
                                 {
-                                    <td class="text-center">
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <button class="btn btn-sm btn-toggle-active @(item.IsActive == true ? "btn-warning" : "btn-success")"
-                                                    data-id="@item.FoodItemId"
-                                                    @(item.IsActive == true && (item.QuantityInStock ?? 0) > 0 ? "disabled=\"disabled\"" : "")> 
-                                                @(item.IsActive==true ? "Deactivate" : "Activate")
-                                            </button>
-
-                                            <a asp-action="Details" asp-route-id="@item.FoodItemId" class="btn btn-outline-secondary btn-sm">Details</a>
-                                            <a asp-action="Edit" asp-route-id="@item.FoodItemId" class="btn btn-info btn-sm text-white">Edit</a>
-                                        </div>
-                                    </td>
+                                    <td>…</td>
                                 }
+                                <td class="text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button class="btn btn-sm btn-toggle-active @(item.IsActive == true ? "btn-warning" : "btn-success")"
+                                                data-id="@item.FoodItemId"
+                                        @(item.IsActive == true && (item.QuantityInStock ?? 0) > 0 ? "disabled=\"disabled\"" : "")>
+                                            @(item.IsActive == true ? "Deactivate" : "Activate")
+                                        </button>
+
+                                    </div>
+                                </td>
                             </tr>
                         }
                     }
@@ -292,48 +291,58 @@
                 });
             });
 
-            document.querySelectorAll('.btn-toggle-active').forEach(btn => {
-                btn.addEventListener('click', async function () {
-                    const id = this.getAttribute('data-id');
-                    const btnRef = this;
-                    const originalText = btnRef.innerText;
-                    btnRef.disabled = true;
+               document.querySelectorAll('.btn-toggle-active').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const row = this.closest('tr');
+            const qtyInput = row.querySelector('.qty-input');
+            const quantity = parseInt(qtyInput?.value || "0", 10);
 
-                    try {
-                        const res = await fetch(`${apiBase}/${id}/toggle-active`, { method: 'POST' });
+            // Validación: solo permitir desactivar si la cantidad es 0
+            const isCurrentlyActive = this.innerText.trim() === 'Deactivate';
+            if (isCurrentlyActive && quantity > 0) {
+                alert('⚠ No se puede desactivar un item con cantidad mayor a 0.');
+                return;
+            }
 
-                        if (res.status === 400) {
-                            alert('⚠ No se puede cambiar el estado: ' + await res.text());
-                            return;
-                        }
-                        if (!res.ok) {
-                            alert('❌ Error al cambiar estado: ' + await res.text());
-                            return;
-                        }
+            const id = this.getAttribute('data-id');
+            const btnRef = this;
+            const originalText = btnRef.innerText;
+            btnRef.disabled = true;
 
-                        const json = await res.json();
-                        const isActive = json.isActive;
-                        btnRef.innerText = isActive ? 'Deactivate' : 'Activate';
-                        btnRef.classList.toggle('btn-warning', isActive);
-                        btnRef.classList.toggle('btn-success', !isActive);
+            try {
+                const res = await fetch(`${apiBase}/${id}/toggle-active`, { method: 'POST' });
 
-                        const row = btnRef.closest('tr');
-                        const statusTd = row.querySelector('.status-cell');
-                        if (statusTd) {
-                            statusTd.innerHTML = isActive
-                                ? '<span class="badge-active">Active</span>'
-                                : '<span class="badge-inactive">Inactive</span>';
-                        }
+                if (res.status === 400) {
+                    alert('⚠ No se puede cambiar el estado: ' + await res.text());
+                    return;
+                }
+                if (!res.ok) {
+                    alert('❌ Error al cambiar estado: ' + await res.text());
+                    return;
+                }
 
-                        alert(`✅ Item ${isActive ? 'activado' : 'desactivado'} correctamente.`);
-                    } catch (err) {
-                        alert('🌐 Error de red: ' + err.message);
-                        btnRef.innerText = originalText; 
-                    } finally {
-                        btnRef.disabled = false;
-                    }
-                });
-            });
+                const json = await res.json();
+                const isActive = json.isActive;
+                btnRef.innerText = isActive ? 'Deactivate' : 'Activate';
+                btnRef.classList.toggle('btn-warning', isActive);
+                btnRef.classList.toggle('btn-success', !isActive);
+
+                const statusTd = row.querySelector('.status-cell');
+                if (statusTd) {
+                    statusTd.innerHTML = isActive
+                        ? '<span class="badge-active">Active</span>'
+                        : '<span class="badge-inactive">Inactive</span>';
+                }
+
+                alert(`✅ Item ${isActive ? 'activado' : 'desactivado'} correctamente.`);
+            } catch (err) {
+                alert('🌐 Error de red: ' + err.message);
+                btnRef.innerText = originalText;
+            } finally {
+                btnRef.disabled = false;
+            }
+        });
+    });
         });
     })();
 </script>

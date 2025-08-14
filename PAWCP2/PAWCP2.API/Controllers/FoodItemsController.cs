@@ -110,16 +110,16 @@
         {
             try
             {
-
-                var items = await _manager.GetByRoleAsync(0);
-                var item = items.FirstOrDefault(f => f.FoodItemId == id);
+                var item = await _manager.GetByIdAsync(id); // <-- buscar por ID directamente
                 if (item == null) return NotFound();
+
                 if (item.IsActive == true && (item.QuantityInStock ?? 0) > 0)
                     return BadRequest("Cannot deactivate item with quantity > 0.");
 
                 var newState = !(item.IsActive ?? false);
                 var success = await _manager.SetActiveAsync(id, newState);
                 if (!success) return NotFound();
+
                 return Ok(new { isActive = newState });
             }
             catch (Exception ex)

@@ -17,6 +17,8 @@ namespace PAWCP2.Core.Manager
         Task<bool> SetQuantityAsync(int id, int quantity);
         Task<bool> SetActiveAsync(int id, bool isActive);
 
+        Task<FoodItem> GetByIdAsync(int id);
+
     }
 
     public class ManagerFoodItem : IManagerFoodItem
@@ -31,6 +33,11 @@ namespace PAWCP2.Core.Manager
         public async Task<IEnumerable<FoodItem>> GetByRoleAsync(int roleId)
         {
             return await _repository.ReadByRoleAsync(roleId);
+        }
+
+        public async Task<FoodItem> GetByIdAsync(int id)
+        {
+            return await _repository.ReadByIdAsync(id); // <- este método lo implementas en tu repository
         }
 
         public async Task<List<string>> GetCategoriesAsync()
@@ -48,5 +55,9 @@ namespace PAWCP2.Core.Manager
 
         public async Task<bool> SetActiveAsync(int id, bool isActive)
             => await _repository.SetActiveAsync(id, isActive);
+
+
     }
+
+
 }
