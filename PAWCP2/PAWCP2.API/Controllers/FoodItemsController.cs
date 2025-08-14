@@ -36,7 +36,9 @@
                     Supplier = item.Supplier,
                     IsActive = item.IsActive,
                     PriceRange = item.Price > 0 ? item.Price : 0,
-                    ExpirationDate = item.ExpirationDate
+                    ExpirationDate = item.ExpirationDate,
+                    Unit = item.Unit,
+                    QuantityInStock = item.QuantityInStock
                 }).ToList();
 
                 return Ok(dtos);
@@ -85,6 +87,49 @@
             }
         }
 
+    
+    // POST: api/FoodItems/{id}/quantity
+[HttpPost("{id}/quantity")]
+        public async Task<IActionResult> SetQuantity(int id, [FromBody] QuantityUpdateDto dto)
+        {
+            try
+            {
+                var success = await _manager.SetQuantityAsync(id, dto.Quantity);
+                if (!success) return NotFound();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        // POST: api/FoodItems/{id}/toggle-active
+        [HttpPost("{id}/toggle-active")]
+        public async Task<IActionResult> ToggleActive(int id)
+        {
+            try
+            {
+
+                var items = await _manager.GetByRoleAsync(0);
+                var item = items.FirstOrDefault(f => f.FoodItemId == id);
+                if (item == null) return NotFound();
+                if (item.IsActive == true && (item.QuantityInStock ?? 0) > 0)
+                    return BadRequest("Cannot deactivate item with quantity > 0.");
+
+                var newState = !(item.IsActive ?? false);
+                var success = await _manager.SetActiveAsync(id, newState);
+                if (!success) return NotFound();
+                return Ok(new { isActive = newState });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
+    public class QuantityUpdateDto { public int Quantity { get; set; } }
+
 }
 

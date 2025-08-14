@@ -74,7 +74,23 @@ builder.Services.AddScoped<IManagerFoodItem, ManagerFoodItem>();
 // ****************************************************************************//
 
 
+var allowedOrigin = "https://localhost:7063"; 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocal", policy =>
+    {
+        policy.WithOrigins("https://localhost:7063", "https://localhost:7099") 
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
+app.UseCors("AllowLocal");
+app.MapControllers();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

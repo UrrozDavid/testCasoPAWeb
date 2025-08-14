@@ -43,6 +43,11 @@ namespace PAWCP2.Models.DTOs
 
         [JsonPropertyName("expirationDate")]
         public DateOnly? ExpirationDate { get; set; }
+        [JsonPropertyName("Unit")]
+        public string? Unit { get; set; }
+        [JsonPropertyName("QuantityInStock")]
+        public int? QuantityInStock { get; set; } 
+  
     }
 }
 

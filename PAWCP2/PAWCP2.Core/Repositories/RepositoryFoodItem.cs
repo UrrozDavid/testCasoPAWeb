@@ -17,6 +17,9 @@ namespace PAWCP2.Core.Repositories
         Task<List<string>> GetCategoriesAsync();
         Task<List<string>> GetBrandsAsync();
         Task<List<string>> GetSuppliersAsync();
+        Task<bool> SetQuantityAsync(int id, int quantity);
+        Task<bool> SetActiveAsync(int id, bool isActive);
+
     }
 
     public class RepositoryFoodItem : RepositoryBase<FoodItem>, IRepositoryFoodItem
@@ -58,6 +61,24 @@ namespace PAWCP2.Core.Repositories
                 .Distinct()
                 .ToListAsync();
         }
+        public async Task<bool> SetQuantityAsync(int id, int quantity)
+        {
+            var item = await _context.FoodItems.FindAsync(id);
+            if (item == null) return false;
+            item.QuantityInStock = quantity;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> SetActiveAsync(int id, bool isActive)
+        {
+            var item = await _context.FoodItems.FindAsync(id);
+            if (item == null) return false;
+            item.IsActive = isActive;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
 
     }
 }

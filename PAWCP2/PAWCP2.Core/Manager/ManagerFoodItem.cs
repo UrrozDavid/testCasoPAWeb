@@ -14,6 +14,9 @@ namespace PAWCP2.Core.Manager
         Task<List<string>> GetCategoriesAsync();
         Task<List<string>> GetBrandsAsync();
         Task<List<string>> GetSuppliersAsync();
+        Task<bool> SetQuantityAsync(int id, int quantity);
+        Task<bool> SetActiveAsync(int id, bool isActive);
+
     }
 
     public class ManagerFoodItem : IManagerFoodItem
@@ -39,5 +42,11 @@ namespace PAWCP2.Core.Manager
 
         public async Task<List<string>> GetSuppliersAsync()
             => await _repository.GetSuppliersAsync();
+    
+    public async Task<bool> SetQuantityAsync(int id, int quantity)
+    => await _repository.SetQuantityAsync(id, quantity);
+
+        public async Task<bool> SetActiveAsync(int id, bool isActive)
+            => await _repository.SetActiveAsync(id, isActive);
     }
 }

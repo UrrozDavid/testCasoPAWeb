@@ -18,4 +18,5 @@ public class FoodItemSearchViewModel
     public int? CaloriesMax { get; set; }
     public string? Supplier { get; set; }
     public bool? IsActive { get; set; }
+
 }

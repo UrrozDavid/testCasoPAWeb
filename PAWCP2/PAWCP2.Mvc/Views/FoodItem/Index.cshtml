@@ -3,205 +3,338 @@
 @{
     ViewData["Title"] = "Food Items";
     var cr = new CultureInfo("es-CR");
+
+
+    var filterAppliedQuery = Context.Request.Query["filterApplied"].FirstOrDefault(); 
+    bool showResults = (filterAppliedQuery == "true") || (Model.FoodItems != null && Model.FoodItems.Any());
 }
 
 <style>
+    .adv-panel {
+        background:#efefef;
+        border-radius:8px;
+        padding:22px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.06);
+        margin-bottom:18px;
+    }
 
-    .filters-card {
-        margin-bottom: 1.25rem;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-        border-radius: .75rem;
+    .adv-row { display:flex; gap:16px; align-items:center; margin-bottom:12px; }
+    .adv-col-label { width:180px; color:#444; font-weight:600; padding-top:6px; }
+    .adv-col-input { flex:1; }
+
+    .adv-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
+    .adv-close { position:relative; right:0; margin-left:12px; }
+    @@media (max-width: 768px) {
+        .adv-row { flex-direction:column; align-items:stretch; }
+        .adv-col-label { width:auto; padding-top:0; }
     }
-    .filters-card .card-body {
-        padding: 1rem;
+
+    .table-wrap {
+        transition: all .25s ease;
     }
-    .filter-row .form-control,
-    .filter-row .form-select {
-        min-width: 0;
-    }
-    .filter-actions {
-        display:flex;
-        gap:.5rem;
-        align-items:center;
-    }
-    .table-responsive {
-        margin-top: .5rem;
-    }
-    .small-muted {
-        font-size: .85rem;
-        color: #6c757d;
-    }
-    .badge-active { background-color: #198754; color: white; }
-    .badge-inactive { background-color: #6c757d; color: white; }
+
+ 
+    .badge-active { background-color:#198754; color:#fff; padding:.35rem .6rem; border-radius:.35rem; display:inline-block; }
+    .badge-inactive { background-color:#6c757d; color:#fff; padding:.35rem .6rem; border-radius:.35rem; display:inline-block; }
+
+ 
+    .qty-inline .qty-input { max-width:90px; text-align:right; }
+    .input-group-sm > .btn { padding: .25rem .5rem; }
 </style>
 
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">@ViewData["Title"]</h1>
-        <div class="small-muted">Resultados: <strong>@Model.FoodItems?.Count() ?? 0</strong></div>
+        <div class="small text-muted">Resultados: <strong>@(Model.FoodItems?.Count() ?? 0)</strong></div>
     </div>
 
-    <div class="card filters-card">
-        <div class="card-body">
-            <form class="row g-2 filter-row" method="get" asp-action="Index">
+ 
+    <div class="adv-panel">
+        <form id="advFilterForm" method="get" asp-action="Index" class="mb-0">
+            <input type="hidden" id="filterAppliedInput" name="filterApplied" value="false" />
 
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Category</label>
+            <div class="adv-row">
+                <div class="adv-col-label">All these words:</div>
+                <div class="adv-col-input">
+                    <input name="Query" class="form-control" placeholder="Enter search keywords..." value="@(Context.Request.Query["Query"].ToString())" /> 
+                </div>
+
+                <div class="adv-col-label">Category:</div>
+                <div class="adv-col-input">
                     <select name="Category" class="form-select">
                         <option value="">All</option>
                         @foreach (var category in Model.Categories)
                         {
-                            <option value="@category" selected="@(Model.Category == category ? "selected" : null)">@category</option>
+                            <option value="@category" selected="@(Model.Category == category ? "selected" : null)">@category</option> 
                         }
                     </select>
                 </div>
+            </div>
 
-                <div class="col-12 col-md-3">
-                    <label class="form-label">Brand</label>
+            <div class="adv-row">
+                <div class="adv-col-label">Brand:</div>
+                <div class="adv-col-input">
                     <select name="Brand" class="form-select">
                         <option value="">All</option>
                         @foreach (var brand in Model.Brands)
                         {
-                            <option value="@brand" selected="@(Model.Brand == brand ? "selected" : null)">@brand</option>
+                            <option value="@brand" selected="@(Model.Brand == brand ? "selected" : null)">@brand</option> 
                         }
                     </select>
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Price Min</label>
-                    <input type="number" step="0.01" name="PriceMin" class="form-control" value="@(Model.PriceMin?.ToString() ?? "")" placeholder="Min" />
+                <div class="adv-col-label">Price range:</div>
+                <div class="adv-col-input d-flex gap-2">
+                    <input type="number" step="0.01" name="PriceMin" class="form-control" placeholder="Min" value="@(Model.PriceMin?.ToString() ?? "")" />
+                    <input type="number" step="0.01" name="PriceMax" class="form-control" placeholder="Max" value="@(Model.PriceMax?.ToString() ?? "")" />
+                </div>
+            </div>
+
+            <div class="adv-row">
+                <div class="adv-col-label">Exp. after</div>
+                <div class="adv-col-input">
+                    <input type="date" name="ExpirationDate" class="form-control" value="@(Model.ExpirationDate.HasValue ? Model.ExpirationDate.Value.ToString("yyyy-MM-dd") : "")" />
                 </div>
 
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Price Max</label>
-                    <input type="number" step="0.01" name="PriceMax" class="form-control" value="@(Model.PriceMax?.ToString() ?? "")" placeholder="Max" />
-                </div>
-
-                <div class="col-12 col-md-2">
-                    <label class="form-label">Supplier</label>
-                    <select name="Supplier" class="form-select">
-                        <option value="">All</option>
-                        @foreach (var supplier in Model.Suppliers)
-                        {
-                            <option value="@supplier" selected="@(Model.Supplier == supplier ? "selected" : null)">@supplier</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Exp. after</label>
-                    <input type="date" name="ExpirationDate" class="form-control"
-                           value="@(Model.ExpirationDate.HasValue ? Model.ExpirationDate.Value.ToString("yyyy-MM-dd") : "")" />
-                </div>
-
-                <div class="col-6 col-md-2">
-                    <label class="form-label">Calories ≤</label>
+                <div class="adv-col-label">Calories ≤</div>
+                <div class="adv-col-input">
                     <input type="number" name="CaloriesMax" class="form-control" value="@(Model.CaloriesMax?.ToString() ?? "")" />
                 </div>
+            </div>
 
-                <div class="col-6 col-md-2 d-flex align-items-center">
-                    <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="isPerishable" name="IsPerishable" value="true"
-                               @(Model.IsPerishable == true ? "checked" : "") />
-                        <label class="form-check-label" for="isPerishable">Is Perishable</label>
-                    </div>
+            <div class="adv-row">
+                <div class="adv-col-label">Supplier</div>
+                <div class="adv-col-input">
+                    <select name="Supplier" class="form-select">
+                        <option value="">All</option>
+                        @foreach (var s in Model.Suppliers)
+                        {
+                            <option value="@s" selected="@(Model.Supplier == s ? "selected" : null)">@s</option> 
+                        }
+                    </select>
                 </div>
 
-                <div class="col-6 col-md-2 d-flex align-items-center">
-                    <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" value="true"
-                               @(Model.IsActive == true ? "checked" : "") />
+                <div class="adv-col-label">Flags</div>
+                <div class="adv-col-input d-flex gap-3 align-items-center">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isPerishable" name="IsPerishable" value="true" @(Model.IsPerishable == true ? "checked" : "") />
+                        <label class="form-check-label" for="isPerishable">Is Perishable</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="isActive" name="IsActive" value="true" @(Model.IsActive == true ? "checked" : "") />
                         <label class="form-check-label" for="isActive">Is Active</label>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-12 col-md-4 d-flex justify-content-end align-items-end filter-actions">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                    <button type="submit" name="clear" value="true" class="btn btn-outline-secondary">Clear</button>
+            <div class="adv-row justify-content-end">
+                <div class="adv-col-input d-flex gap-2">
+                    <button type="submit" id="searchBtn" class="btn btn-primary">Search</button>
+                    <button type="submit" name="clear" value="true" id="clearBtn" class="btn btn-outline-secondary">Clear</button>
+                    <button type="button" id="toggleTableBtn" class="btn btn-light adv-close" onclick="toggleTableVisibility()">Close filters</button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-hover table-bordered align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>Brand</th>
-                    <th class="text-end">Price</th>
-                    <th>Unit</th>
-                    <th class="text-end">Qty</th>
-                    <th>Expiration</th>
-                    <th>Perishable</th>
-                    <th class="text-end">Calories</th>
-                    <th>Supplier</th>
-                    <th>Status</th>
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <th>Actions</th>
-                    }
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.FoodItems == null || !Model.FoodItems.Any())
-                {
+    <div id="tableWrap" class="table-wrap" style="display:@(showResults ? "block" : "none")">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td colspan="12" class="text-center small-muted">No items found.</td>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Brand</th>
+                        <th class="text-end">Price</th>
+                        <th>Unit</th>
+                        <th class="text-end">Qty</th>
+                        <th>Expiration</th>
+                        <th>Perishable</th>
+                        <th class="text-end">Calories</th>
+                        <th>Supplier</th>
+                        <th>Status</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th>Actions</th>
+                        }
                     </tr>
-                }
-                else
-                {
-                    foreach (var item in Model.FoodItems)
+                </thead>
+                <tbody>
+                    @if (Model.FoodItems == null || !Model.FoodItems.Any())
                     {
                         <tr>
-                            <td>@item.Name</td>
-                            <td>@item.Category</td>
-                            <td>@item.Brand</td>
-                            <td class="text-end">@item.Price.ToString("C0", cr)</td>
-                            <td>-</td>
-                            <td class="text-end">-</td>
-                            <td>
-                                @(
-                                    item.ExpirationDate.HasValue
-                                    ? item.ExpirationDate.Value.ToString("yyyy-MM-dd")
-                                    : "-"
-                                  )
-                            </td>
-                            <td>
-                                @(item.IsPerishable == true ? "Yes" : "No")
-                            </td>
-                            <td class="text-end">@(item.CaloriesPerServing?.ToString() ?? "-")</td>
-                            <td>@(item.Supplier ?? "-")</td>
-                            <td>
-                                @if (item.IsActive == true)
-                                {
-                                    <span class="badge badge-active">Active</span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-inactive">Inactive</span>
-                                }
-                            </td>
-
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        <a asp-action="Details" asp-route-id="@item.FoodItemId" class="btn btn-outline-secondary btn-sm">Details</a>
-                                        <a asp-action="Edit" asp-route-id="@item.FoodItemId" class="btn btn-info btn-sm text-white">Edit</a>
-                                        <form asp-action="Delete" asp-route-id="@item.FoodItemId" method="post" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este item?');">Delete</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            }
+                            <td colspan="12" class="text-center small text-muted">No items found.</td>
                         </tr>
                     }
-                }
-            </tbody>
-        </table>
+                    else
+                    {
+                        foreach (var item in Model.FoodItems)
+                        {
+                            <tr data-id="@item.FoodItemId">
+                                <td>@item.Name</td>
+                                <td>@item.Category</td>
+                                <td>@item.Brand</td>
+                                <td class="text-end">@item.Price.ToString("C0", cr)</td>
+                                <td>@(item.Unit ?? "-")</td>
+
+                                @* Inline quantity editor *@
+                                <td class="text-end">
+                                    <div class="input-group input-group-sm qty-inline" data-id="@item.FoodItemId">
+                                        <input type="number" min="0" class="form-control form-control-sm qty-input" value="@(item.QuantityInStock ?? 0)" />
+                                        <button class="btn btn-outline-success btn-sm btn-save-qty" type="button">Save</button>
+                                    </div>
+                                </td>
+
+                                <td>@(item.ExpirationDate.HasValue ? item.ExpirationDate.Value.ToString("yyyy-MM-dd") : "-")</td>
+                                <td>@(item.IsPerishable == true ? "Yes" : "No")</td>
+                                <td class="text-end">@(item.CaloriesPerServing?.ToString() ?? "-")</td>
+                                <td>@(item.Supplier ?? "-")</td>
+                                <td class="status-cell">
+                                    @if (item.IsActive == true)
+                                    {
+                                        <span class="badge-active">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-inactive">Inactive</span>
+                                    }
+                                </td>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <td class="text-center">
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button class="btn btn-sm btn-toggle-active @(item.IsActive == true ? "btn-warning" : "btn-success")"
+                                                    data-id="@item.FoodItemId"
+                                                    @(item.IsActive == true && (item.QuantityInStock ?? 0) > 0 ? "disabled=\"disabled\"" : "")> 
+                                                @(item.IsActive==true ? "Deactivate" : "Activate")
+                                            </button>
+
+                                            <a asp-action="Details" asp-route-id="@item.FoodItemId" class="btn btn-outline-secondary btn-sm">Details</a>
+                                            <a asp-action="Edit" asp-route-id="@item.FoodItemId" class="btn btn-info btn-sm text-white">Edit</a>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const apiBase = "https://localhost:7099/api/FoodItems";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterInput = document.getElementById('filterAppliedInput');
+
+
+            const searchBtn = document.getElementById('searchBtn');
+            if (searchBtn && filterInput) {
+                searchBtn.addEventListener('click', function () {
+                    filterInput.value = "true";
+                });
+            }
+
+
+            const clearBtn = document.getElementById('clearBtn');
+            if (clearBtn && filterInput) {
+                clearBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.getElementById('advFilterForm').reset();
+                    filterInput.value = "false";
+                    window.location.href = window.location.pathname;
+                });
+            }
+
+
+            document.querySelectorAll('.btn-save-qty').forEach(btn => {
+                btn.addEventListener('click', async function () {
+                    const wrap = this.closest('.qty-inline');
+                    const id = wrap.getAttribute('data-id');
+                    const input = wrap.querySelector('.qty-input');
+                    const qty = parseInt(input.value || "0", 10);
+                    const originalText = this.innerText;
+                    this.disabled = true;
+
+                    try {
+                        const res = await fetch(`${apiBase}/${id}/quantity`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ quantity: qty })
+                        });
+
+                        if (!res.ok) {
+                            alert('❌ Error actualizando cantidad: ' + await res.text());
+                            return;
+                        }
+
+                        const row = wrap.closest('tr');
+                        const toggleBtn = row.querySelector('.btn-toggle-active');
+                        if (toggleBtn) {
+                            if (qty > 0) {
+                                toggleBtn.setAttribute('disabled', 'disabled');
+                            } else {
+                                toggleBtn.removeAttribute('disabled');
+                            }
+                        }
+
+                        alert('✅ Cantidad actualizada correctamente.');
+                    } catch (err) {
+                        alert('🌐 Error de red: ' + err.message);
+                    } finally {
+                        this.disabled = false;
+                        this.innerText = originalText;
+                    }
+                });
+            });
+
+            document.querySelectorAll('.btn-toggle-active').forEach(btn => {
+                btn.addEventListener('click', async function () {
+                    const id = this.getAttribute('data-id');
+                    const btnRef = this;
+                    const originalText = btnRef.innerText;
+                    btnRef.disabled = true;
+
+                    try {
+                        const res = await fetch(`${apiBase}/${id}/toggle-active`, { method: 'POST' });
+
+                        if (res.status === 400) {
+                            alert('⚠ No se puede cambiar el estado: ' + await res.text());
+                            return;
+                        }
+                        if (!res.ok) {
+                            alert('❌ Error al cambiar estado: ' + await res.text());
+                            return;
+                        }
+
+                        const json = await res.json();
+                        const isActive = json.isActive;
+                        btnRef.innerText = isActive ? 'Deactivate' : 'Activate';
+                        btnRef.classList.toggle('btn-warning', isActive);
+                        btnRef.classList.toggle('btn-success', !isActive);
+
+                        const row = btnRef.closest('tr');
+                        const statusTd = row.querySelector('.status-cell');
+                        if (statusTd) {
+                            statusTd.innerHTML = isActive
+                                ? '<span class="badge-active">Active</span>'
+                                : '<span class="badge-inactive">Inactive</span>';
+                        }
+
+                        alert(`✅ Item ${isActive ? 'activado' : 'desactivado'} correctamente.`);
+                    } catch (err) {
+                        alert('🌐 Error de red: ' + err.message);
+                        btnRef.innerText = originalText; 
+                    } finally {
+                        btnRef.disabled = false;
+                    }
+                });
+            });
+        });
+    })();
+</script>
+

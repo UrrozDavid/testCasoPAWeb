@@ -3,6 +3,7 @@ using PAW.Architecture.Providers;
 using PAWCP2.Models.DTOs;
 using PAWCP2.Models.Entities;
 using PAWCP2.Mvc.ViewModels;
+using System.Net; // Added for HttpStatusCode
 
 namespace PAWCP2.Mvc.Service
 {
@@ -14,6 +15,9 @@ namespace PAWCP2.Mvc.Service
         Task<List<string>> GetCategoriesAsync();
         Task<List<string>> GetBrandsAsync();
         Task<List<string>> GetSuppliersAsync();
+        Task<bool> SetQuantityAsync(int id, int quantity);
+        Task<bool> ToggleActiveAsync(int id);
+
     }
 
     public class FoodItemService : IFoodItemService
@@ -34,13 +38,13 @@ namespace PAWCP2.Mvc.Service
             var responseFood = await _restProvider.GetAsync("https://localhost:7099/api/FoodItems/role/", $"{roleId}");
             var foodItemsDto = await JsonProvider.DeserializeAsync<List<FoodItemDto>>(responseFood);
 
-            var foodItems = foodItemsDto.Select(dto => new FoodItem
+            var foodItems = foodItemsDto?.Select(dto => new FoodItem
             {
                 FoodItemId = dto.FoodItemId,
-                Name = dto.Name,
+                Name = dto.Name ?? string.Empty, 
                 Category = dto.Category,
                 Price = dto.Price
-            }).ToList();
+            }).ToList() ?? new List<FoodItem>();
 
             return foodItems;
         }
@@ -97,6 +101,30 @@ namespace PAWCP2.Mvc.Service
             var response = await _restProvider.GetAsync("https://localhost:7099/api/FoodItems/suppliers", null);
             var suppliers = await JsonProvider.DeserializeAsync<List<string>>(response);
             return suppliers ?? new List<string>();
+        }
+
+        public async Task<bool> SetQuantityAsync(int id, int quantity)
+        {
+            var payload = JsonProvider.Serialize(new { Quantity = quantity });
+            var response = await _restProvider.PostAsync($"https://localhost:7099/api/FoodItems/{id}/quantity", payload);
+
+            return IsSuccessStatus(response);
+        }
+
+        public async Task<bool> ToggleActiveAsync(int id)
+        {
+            var response = await _restProvider.PostAsync($"https://localhost:7099/api/FoodItems/{id}/toggle-active", string.Empty); 
+
+            return IsSuccessStatus(response);
+        }
+
+
+        private bool IsSuccessStatus(string response)
+        {
+
+            if (string.IsNullOrWhiteSpace(response)) return false;
+            return response.Contains("OK", StringComparison.OrdinalIgnoreCase) ||
+                   response.Contains("Success", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
